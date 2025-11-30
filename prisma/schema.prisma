@@ -1,0 +1,52 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  nombre     String
+  email      String   @unique
+  passwordHash String // 👈 contraseña encriptada
+
+  isDisabled Boolean  @default(false)
+  disabledAt DateTime?
+
+  canCreateBooks   Boolean @default(false)
+  canUpdateBooks   Boolean @default(false)
+  canDisableBooks  Boolean @default(false)
+  canUpdateUsers   Boolean @default(false)
+  canDisableUsers  Boolean @default(false)
+
+  reservas Reservation[]
+}
+
+model Book {
+  id               Int      @id @default(autoincrement())
+  nombre           String
+  autor            String
+  genero           String?
+  casaEditorial    String?
+  fechaPublicacion DateTime?
+  disponibilidad   Boolean  @default(true)
+  isDisabled       Boolean  @default(false)
+  disabledAt       DateTime?
+
+  reservas Reservation[]
+}
+
+model Reservation {
+  id           Int      @id @default(autoincrement())
+  fechaReserva DateTime @default(now())
+  fechaEntrega DateTime?
+
+  usuarioId Int
+  libroId  Int
+
+  usuario User @relation(fields: [usuarioId], references: [id])
+  libro   Book @relation(fields: [libroId], references: [id])
+}
